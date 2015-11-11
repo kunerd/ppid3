@@ -95,10 +95,6 @@ public class SecureAdditionTests {
 
 		subject.backwardStep(previousPartyResult);
 
-		// TODO: remove hard coded values
-		// PowerMockito.verifyNew(BigInteger.class)
-		// .withArguments(512, 64, secureRand);
-
 		BigInteger actual = subject.getOutputShare();
 		assertEquals(expected, actual);
 	}
