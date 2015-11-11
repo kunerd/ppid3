@@ -2,6 +2,7 @@ package de.henku.algorithm.id3_horizontal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.henku.algorithm.id3_horizontal.communication.NodeValuePair;
@@ -45,7 +46,7 @@ public class SquareDivisionLastController implements SquareDivisionSenderAdapter
 		String attrName = pojo.getAttrName();
 		String attrValue = pojo.getAttrValue();
 		List<NodeValuePair> path = pojo.getPath();
-		List<Pair<String, Long>> countPerValue = dataLayer.countPerClassValue(path, attrName, attrValue);
+		Map countPerValue = dataLayer.countPerClassValue(path, attrName, attrValue);
 
 		List<MultiplicationResult> fr = d.handleMultiplicationForwardStep(countPerValue, pojo.getResults());
 		List<MultiplicationResult> br = d.handleMultiplicationBackwardStep(fr);

@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -69,7 +71,7 @@ public class SquareDivisionMasterControllerTests {
 		List<NodeValuePair> path = new ArrayList<NodeValuePair>();
 		subject.compute("attrName", "attrValue", path);
 
-		List<Pair<String, Long>> il = new ArrayList<Pair<String,Long>>();
+		Map<Object, Long> il = new ConcurrentHashMap<>();
 		List<MultiplicationResult> ol = new ArrayList<MultiplicationResult>();
 		
 		when(squareDivisionMock.createMultiplications(il)).thenReturn(ol);
@@ -82,8 +84,8 @@ public class SquareDivisionMasterControllerTests {
 		List<NodeValuePair> path = new ArrayList<NodeValuePair>();
 
 		subject.compute("attrName", "attrValue", path);
-		
-		List<Pair<String, Long>> il = new ArrayList<Pair<String,Long>>();
+
+		Map<Object, Long> il = new ConcurrentHashMap<>();
 		List<MultiplicationResult> ol = new ArrayList<MultiplicationResult>();
 		when(squareDivisionMock.createMultiplications(il)).thenReturn(ol);
 		

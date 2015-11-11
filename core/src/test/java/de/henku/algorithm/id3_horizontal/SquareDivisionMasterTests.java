@@ -1,6 +1,10 @@
 package de.henku.algorithm.id3_horizontal;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -10,13 +14,17 @@ import static org.mockito.Mockito.when;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.Before;
 import org.junit.Test;
 
 import de.henku.computations.SecureComputationMaster;
 import de.henku.jpaillier.KeyPair;
 import de.henku.jpaillier.KeyPairBuilder;
+import org.mockito.Matchers;
 
 public class SquareDivisionMasterTests {
 
@@ -48,9 +56,9 @@ public class SquareDivisionMasterTests {
 	
 	@Test
 	public void createMultiplications_createsOneSecureComputationForEachInput() {
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String,Long>>();
-		counts.add(new Pair<String, Long>("classAttr1", INPUT_1));
-		counts.add(new Pair<String, Long>("classAttr2", INPUT_2));
+		Map<Object, Long> counts = new ConcurrentHashMap<>();
+		counts.put("classAttr1", INPUT_1);
+		counts.put("classAttr2", INPUT_2);
 		
 		subject.createMultiplications(counts);
 
@@ -60,9 +68,9 @@ public class SquareDivisionMasterTests {
 	
 	@Test
 	public void createMultiplications_startsEncryptedComputationForEachInput() {
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String,Long>>();
-		counts.add(new Pair<String, Long>("classAttr1", INPUT_1));
-		counts.add(new Pair<String, Long>("classAttr2", INPUT_2));
+        Map<Object, Long> counts = new ConcurrentHashMap<>();
+		counts.put("classAttr1", INPUT_1);
+		counts.put("classAttr2", INPUT_2);
 		
 		
 		subject.createMultiplications(counts);
@@ -73,9 +81,9 @@ public class SquareDivisionMasterTests {
 	
 	@Test
 	public void createMultiplications_createsOneMultiplicationResultForEachInput() {
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String, Long>>();
-		counts.add(new Pair<String, Long>("classAttr1", INPUT_1));
-		counts.add(new Pair<String, Long>("classAttr2", INPUT_2));
+        Map<Object, Long> counts = new ConcurrentHashMap<>();
+		counts.put("classAttr1", INPUT_1);
+		counts.put("classAttr2", INPUT_2);
 		
 		BigInteger r1 = mock(BigInteger.class);
 		BigInteger r2 = mock(BigInteger.class);
@@ -85,22 +93,20 @@ public class SquareDivisionMasterTests {
 		List<MultiplicationResult> results = subject.createMultiplications(counts);
 		
 		assertEquals(counts.size(), results.size());
-		
-		MultiplicationResult a1 = results.get(0);
-		MultiplicationResult a2 = results.get(1);
-		
-		assertEquals("classAttr1", a1.getClassValue());
-		assertEquals("classAttr2", a2.getClassValue());
-		
-		assertEquals(r1, a1.getResult());
-		assertEquals(r2, a2.getResult());
+
+		MultiplicationResult a1 = new MultiplicationResult("classAttr1", r1);
+		MultiplicationResult a2 = new MultiplicationResult("classAttr2", r2);
+
+        System.out.println(results);
+
+		assertThat(results, containsInAnyOrder(a1, a2));
 	}
 	
 	@Test
 	public void multiplicationBackwardStep_decryptsEachMultiplication() {
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String, Long>>();
-		counts.add(new Pair<String, Long>("classAttr1", INPUT_1));
-		counts.add(new Pair<String, Long>("classAttr2", INPUT_2));
+        Map<Object, Long> counts = new ConcurrentHashMap<>();
+		counts.put("classAttr1", INPUT_1);
+		counts.put("classAttr2", INPUT_2);
 		subject.createMultiplications(counts);
 		
 		BigInteger r1 = mock(BigInteger.class);
@@ -125,9 +131,9 @@ public class SquareDivisionMasterTests {
 	
 	@Test
 	public void multiplicationBackwardStep_computesCorrectZ() {
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String, Long>>();
-		counts.add(new Pair<String, Long>("classAttr1", INPUT_1));
-		counts.add(new Pair<String, Long>("classAttr2", INPUT_2));
+        Map<Object, Long> counts = new ConcurrentHashMap<>();
+		counts.put("classAttr1", INPUT_1);
+		counts.put("classAttr2", INPUT_2);
 		subject.createMultiplications(counts);
 		
 		BigInteger r1 = mock(BigInteger.class);
@@ -151,9 +157,9 @@ public class SquareDivisionMasterTests {
 	
 	@Test
 	public void multiplicationBackwardStep_computesCorrectW() {
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String, Long>>();
-		counts.add(new Pair<String, Long>("classAttr1", INPUT_1));
-		counts.add(new Pair<String, Long>("classAttr2", INPUT_2));
+        Map<Object, Long> counts = new ConcurrentHashMap<>();
+		counts.put("classAttr1", INPUT_1);
+		counts.put("classAttr2", INPUT_2);
 		subject.createMultiplications(counts);
 		
 		BigInteger r1 = mock(BigInteger.class);
@@ -177,9 +183,9 @@ public class SquareDivisionMasterTests {
 	
 	@Test
 	public void multiplicationBackwardStep_startsAdditionForZandW() {
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String, Long>>();
-		counts.add(new Pair<String, Long>("classAttr1", INPUT_1));
-		counts.add(new Pair<String, Long>("classAttr2", INPUT_2));
+		Map<Object, Long> counts = new ConcurrentHashMap<>();
+		counts.put("classAttr1", INPUT_1);
+		counts.put("classAttr2", INPUT_2);
 		subject.createMultiplications(counts);
 		
 		BigInteger r1 = mock(BigInteger.class);
@@ -209,9 +215,9 @@ public class SquareDivisionMasterTests {
 
 	@Test
 	public void additionBackwardStep_decryptsZandW() {
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String, Long>>();
-		counts.add(new Pair<String, Long>("classAttr1", INPUT_1));
-		counts.add(new Pair<String, Long>("classAttr2", INPUT_2));
+        Map<Object, Long> counts = new ConcurrentHashMap<>();
+		counts.put("classAttr1", INPUT_1);
+		counts.put("classAttr2", INPUT_2);
 		subject.createMultiplications(counts);
 		
 		BigInteger r1 = mock(BigInteger.class);

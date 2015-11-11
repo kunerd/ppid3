@@ -1,6 +1,7 @@
 package de.henku.algorithm.id3_horizontal;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -49,7 +50,7 @@ public class SquareDivisionMasterController implements
 		SecureSquareDivisionMaster d = squareDivisionFactory.finalize(keyPair);
 		divisions.put(id, d);
 
-		List<Pair<String, Long>> cpcv = dataLayer.countPerClassValue(path,
+		Map<Object, Long> cpcv = dataLayer.countPerClassValue(path,
 				attrName, attrValue);
 		
 		List<MultiplicationResult> results = d.createMultiplications(cpcv);

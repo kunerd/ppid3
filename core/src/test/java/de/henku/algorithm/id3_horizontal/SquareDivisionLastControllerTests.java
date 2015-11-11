@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +65,7 @@ public class SquareDivisionLastControllerTests {
 		List<MultiplicationResult> results = new ArrayList<MultiplicationResult>();
 		SquareDivisionPojo pojo = new SquareDivisionPojo(0, "attrName", "attrValue", path, results);
 		
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String,Long>>();
+		Map<String, Long> counts = new ConcurrentHashMap<>();
 		when(dataLayerMock.countPerClassValue(path, "attrName", "attrValue")).thenReturn(counts);
 		
 		subject.handleMultiplicationForwardStep(pojo);
@@ -78,8 +80,8 @@ public class SquareDivisionLastControllerTests {
 
 		List<MultiplicationResult> results = new ArrayList<MultiplicationResult>();
 		SquareDivisionPojo pojo = new SquareDivisionPojo(0, "attrName", "attrValue", path, results);
-		
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String,Long>>();
+
+		Map<String, Long> counts = new ConcurrentHashMap<>();
 		when(dataLayerMock.countPerClassValue(path, "attrName", "attrValue")).thenReturn(counts);
 		
 		List<MultiplicationResult> forwardResults = new ArrayList<MultiplicationResult>();
@@ -96,8 +98,8 @@ public class SquareDivisionLastControllerTests {
 
 		List<MultiplicationResult> results = new ArrayList<MultiplicationResult>();
 		SquareDivisionPojo pojo = new SquareDivisionPojo(0, "attrName", "attrValue", path, results);
-		
-		List<Pair<String, Long>> counts = new ArrayList<Pair<String,Long>>();
+
+		Map<String, Long> counts = new ConcurrentHashMap<>();
 		when(dataLayerMock.countPerClassValue(path, "attrName", "attrValue")).thenReturn(counts);
 		
 		List<MultiplicationResult> forwardResults = new ArrayList<MultiplicationResult>();

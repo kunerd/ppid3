@@ -3,14 +3,15 @@ package de.henku.example.id3.utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import de.henku.algorithm.id3_horizontal.Attribute;
 import de.henku.algorithm.id3_horizontal.DataLayer;
-import de.henku.algorithm.id3_horizontal.Pair;
 import de.henku.algorithm.id3_horizontal.communication.NodeValuePair;
 
-public class ListDataLayer<T extends HashMap<String, String>> implements DataLayer {
+public class ListDataLayer<T extends HashMap<String, String>> implements DataLayer<String> {
 	
 	private List<T> transactions;
 	private Attribute classAttribute;
@@ -22,7 +23,7 @@ public class ListDataLayer<T extends HashMap<String, String>> implements DataLay
 	}
 
 	@Override
-	public List<Pair<String, Long>> countPerClassValue(
+	public Map<String, Long> countPerClassValue(
 			List<NodeValuePair> path, String attrName, String attrValue) {
 
 		List<T> subsetForPath = new ArrayList<>(transactions);
@@ -39,13 +40,13 @@ public class ListDataLayer<T extends HashMap<String, String>> implements DataLay
 				.collect(Collectors.toList());
 
 		String className = classAttribute.getName();
-		List<Pair<String, Long>> result = new ArrayList<>();
+		Map<String, Long> result = new ConcurrentHashMap<>();
 		for (String classValue : classAttribute.getValues()) {
 			long count = subsetForValue.stream()
 					.filter( p -> p.get(className).equals(classValue))
 					.count();
 
-			result.add(new Pair<>(classValue, count));
+			result.put(classValue, count);
 		}
 
 		return result;

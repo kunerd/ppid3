@@ -3,6 +3,7 @@ package de.henku.algorithm.id3_horizontal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.henku.computations.SecureComputationMaster;
@@ -19,8 +20,8 @@ public class SecureSquareDivisionMaster {
 	private SecureComputationMaster z;
 	private SecureComputationMaster w;
 	
-	private final ConcurrentHashMap<String, SecureComputationMaster> multiplications =
-			new ConcurrentHashMap<String, SecureComputationMaster>();
+	private final ConcurrentHashMap<Object, SecureComputationMaster> multiplications =
+			new ConcurrentHashMap<Object, SecureComputationMaster>();
 	
 	SecureSquareDivisionMaster(KeyPair keyPair, FactoryHelper factoryHelper) {
 		this.keyPair = keyPair;
@@ -31,13 +32,11 @@ public class SecureSquareDivisionMaster {
 		this(keyPair, new FactoryHelper());
 	}
 
-	// FIXME better implementation for pair
-	public List<MultiplicationResult> createMultiplications(List<Pair<String, Long>> counts) {
+	public List<MultiplicationResult> createMultiplications(Map<Object, Long> counts) {
 		List<MultiplicationResult> results = new ArrayList<MultiplicationResult>();
 		
-		for (Pair<String, Long> pair : counts) {
-			String classValue = pair.first;
-			long count = pair.second;
+		for (Object classValue : counts.keySet()) {
+			long count = counts.get(classValue);
 			
 			SecureComputationMaster m = factoryHelper.finalize(count, keyPair);
 			multiplications.put(classValue, m);
@@ -53,7 +52,7 @@ public class SecureSquareDivisionMaster {
 	public AdditionResults handleMultiplicationBackwardStep(List<MultiplicationResult> results) {
 		
 		for (MultiplicationResult r : results) {
-			String classValue = r.getClassValue();
+			Object classValue = r.getClassValue();
 			
 			SecureComputationMaster m = multiplications.get(classValue);
 			m.decryptAndSetOutputShare(r.getResult());

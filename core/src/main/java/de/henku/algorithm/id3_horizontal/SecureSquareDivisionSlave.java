@@ -3,6 +3,7 @@ package de.henku.algorithm.id3_horizontal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.henku.computations.SecureAddition;
@@ -21,26 +22,19 @@ public class SecureSquareDivisionSlave {
 	private final List<BigInteger> inputs = new ArrayList<BigInteger>();
 	private final List<BigInteger> multiplicationOutputShares = new ArrayList<BigInteger>();
 
-	private final ConcurrentHashMap<String, SecureMultiplication> multiplications = 
-			new ConcurrentHashMap<String, SecureMultiplication>();
+	private final ConcurrentHashMap<Object, SecureMultiplication> multiplications =
+			new ConcurrentHashMap<>();
 
 	public SecureSquareDivisionSlave(PublicKey publicKey) {
 		this.publicKey = publicKey;
 	}
 	
-	// FIXME replace list
-	public List<MultiplicationResult> handleMultiplicationForwardStep(List<Pair<String, Long>> counts, List<MultiplicationResult> prevResults) {	
-	
+	public List<MultiplicationResult> handleMultiplicationForwardStep(Map<String, Long> counts, List<MultiplicationResult> prevResults) {
 		List<MultiplicationResult> results = new ArrayList<MultiplicationResult>();
 		
 		for (MultiplicationResult r : prevResults) {
-			
-			String classValue = r.getClassValue();
-			
-			// TODO refactor to hashmap 
-			long count = counts.stream()
-				.filter(p -> p.first.equals(classValue))
-				.findFirst().get().second;
+			Object classValue = r.getClassValue();
+			long count = counts.get(classValue);
 
 			inputs.add(BigInteger.valueOf(count));
 
@@ -62,7 +56,7 @@ public class SecureSquareDivisionSlave {
 		List<MultiplicationResult> results = new ArrayList<MultiplicationResult>();
 
 		for (MultiplicationResult r : prevResults) {
-			String classValue = r.getClassValue();
+			Object classValue = r.getClassValue();
 			
 			SecureMultiplication m = multiplications.get(classValue);
 			BigInteger newResult = m.backwardStep(r.getResult());
