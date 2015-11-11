@@ -4,8 +4,9 @@ import de.henku.algorithm.id3_horizontal.AdditionResults;
 
 
 public interface SquareDivisionSenderAdapter {
+    void handleMultiplicationForwardStep(SquareDivisionPojo pojo);
 
-	public void handleMultiplicationForwardStep(SquareDivisionPojo pojo);
-	public void handleAdditionForwardStep(long squareID, AdditionResults pojo);
-	public void collectOutputShares(long squareID);
+    void handleAdditionForwardStep(long squareID, AdditionResults pojo);
+
+    void collectOutputShares(long squareID);
 }

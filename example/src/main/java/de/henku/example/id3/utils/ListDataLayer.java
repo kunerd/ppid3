@@ -1,5 +1,9 @@
 package de.henku.example.id3.utils;
 
+import de.henku.algorithm.id3_horizontal.Attribute;
+import de.henku.algorithm.id3_horizontal.DataLayer;
+import de.henku.algorithm.id3_horizontal.communication.NodeValuePair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,49 +11,45 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import de.henku.algorithm.id3_horizontal.Attribute;
-import de.henku.algorithm.id3_horizontal.DataLayer;
-import de.henku.algorithm.id3_horizontal.communication.NodeValuePair;
+public class ListDataLayer<T extends HashMap<String, String>> implements DataLayer {
 
-public class ListDataLayer<T extends HashMap<String, String>> implements DataLayer<String> {
-	
-	private List<T> transactions;
-	private Attribute classAttribute;
-	
-	public ListDataLayer(List<T> transactions, Attribute classAttribute) {
-		this.transactions = transactions;
-		
-		this.classAttribute = classAttribute;
-	}
+    private List<T> transactions;
+    private Attribute classAttribute;
 
-	@Override
-	public Map<String, Long> countPerClassValue(
-			List<NodeValuePair> path, String attrName, String attrValue) {
+    public ListDataLayer(List<T> transactions, Attribute classAttribute) {
+        this.transactions = transactions;
 
-		List<T> subsetForPath = new ArrayList<>(transactions);
-		
-		for (NodeValuePair nvp : path) {
-			subsetForPath = subsetForPath.stream()
-					.filter(p -> p.get(nvp.getNode()).equals(nvp.getValue()))
-					.collect(Collectors.toList());
-			
-		}
-		
-		List<T> subsetForValue = subsetForPath.stream()
-				.filter( p -> p.get(attrName).equals(attrValue))
-				.collect(Collectors.toList());
+        this.classAttribute = classAttribute;
+    }
 
-		String className = classAttribute.getName();
-		Map<String, Long> result = new ConcurrentHashMap<>();
-		for (String classValue : classAttribute.getValues()) {
-			long count = subsetForValue.stream()
-					.filter( p -> p.get(className).equals(classValue))
-					.count();
+    @Override
+    public Map<Object, Long> countPerClassValue(
+            List<NodeValuePair> path, String attrName, String attrValue) {
 
-			result.put(classValue, count);
-		}
+        List<T> subsetForPath = new ArrayList<>(transactions);
 
-		return result;
-	}
+        for (NodeValuePair nvp : path) {
+            subsetForPath = subsetForPath.stream()
+                    .filter(p -> p.get(nvp.getNode()).equals(nvp.getValue()))
+                    .collect(Collectors.toList());
+
+        }
+
+        List<T> subsetForValue = subsetForPath.stream()
+                .filter(p -> p.get(attrName).equals(attrValue))
+                .collect(Collectors.toList());
+
+        String className = classAttribute.getName();
+        Map<Object, Long> result = new ConcurrentHashMap<>();
+        for (String classValue : classAttribute.getValues()) {
+            long count = subsetForValue.stream()
+                    .filter(p -> p.get(className).equals(classValue))
+                    .count();
+
+            result.put(classValue, count);
+        }
+
+        return result;
+    }
 
 }

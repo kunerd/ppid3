@@ -6,41 +6,41 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ID3Node {
-	
-	private Object label;
-	private ConcurrentHashMap<Object, ID3Node> children = new ConcurrentHashMap<Object, ID3Node>();
 
-	public ID3Node(Object label) {
-		this.label = label;
-	}
+    private Object label;
+    private ConcurrentHashMap<Object, ID3Node> children = new ConcurrentHashMap<>();
 
-	public Object getLabel() {
-		return label;
-	}
+    public ID3Node(Object label) {
+        this.label = label;
+    }
 
-	public void add(Object edge, ID3Node node) {
-		children.put(edge, node);
-	}
+    public Object getLabel() {
+        return label;
+    }
 
-	public Set<Object> getEdges() {
-		return children.keySet();
-	}
+    public void add(Object edge, ID3Node node) {
+        children.put(edge, node);
+    }
 
-	public Collection<ID3Node> getChildren() {
-		return children.values();
-	}
+    public Set<Object> getEdges() {
+        return children.keySet();
+    }
 
-	public ID3Node getChild(Object edge) {
-		return children.get(edge);
-	}
+    public Collection<ID3Node> getChildren() {
+        return children.values();
+    }
 
-	@Override
-	public String toString() {
-		return toString(new StringBuilder(), "", false);
-	}
+    public ID3Node getChild(Object edge) {
+        return children.get(edge);
+    }
 
-	private String toString(StringBuilder in, String value, boolean last) {
-		StringBuilder b = new StringBuilder();
+    @Override
+    public String toString() {
+        return toString(new StringBuilder(), "", false);
+    }
+
+    private String toString(StringBuilder in, String value, boolean last) {
+        StringBuilder b = new StringBuilder();
 
         b.append(in.toString());
 
@@ -63,7 +63,7 @@ public class ID3Node {
             b.append(this.getLabel());
             b.append("\n");
 
-            if(last && getEdges().isEmpty()) {
+            if (last && getEdges().isEmpty()) {
                 b.append(in.toString());
                 b.append("\n");
             }
@@ -73,8 +73,8 @@ public class ID3Node {
         while (iter.hasNext()) {
             Object e = iter.next();
 
-			b.append(getChild(e).toString(new StringBuilder(in), e.toString(), !iter.hasNext()));
-		}
-		return b.toString();
-	}
+            b.append(getChild(e).toString(new StringBuilder(in), e.toString(), !iter.hasNext()));
+        }
+        return b.toString();
+    }
 }

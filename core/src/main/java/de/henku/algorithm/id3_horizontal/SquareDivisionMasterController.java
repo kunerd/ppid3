@@ -1,105 +1,105 @@
 package de.henku.algorithm.id3_horizontal;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-
 import de.henku.algorithm.id3_horizontal.communication.NodeValuePair;
 import de.henku.algorithm.id3_horizontal.communication.SquareDivisionPojo;
 import de.henku.algorithm.id3_horizontal.communication.SquareDivisionReceiverAdapter;
 import de.henku.algorithm.id3_horizontal.communication.SquareDivisionSenderAdapter;
 import de.henku.jpaillier.KeyPair;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
 public class SquareDivisionMasterController implements
-		SquareDivisionReceiverAdapter {
+        SquareDivisionReceiverAdapter {
 
-	private AtomicLong idCounter = new AtomicLong();
-	private final SquareDivisionSenderAdapter sender;
+    private AtomicLong idCounter = new AtomicLong();
+    private final SquareDivisionSenderAdapter sender;
 
-	private ConcurrentHashMap<Long, SecureSquareDivisionMaster> divisions = new ConcurrentHashMap<Long, SecureSquareDivisionMaster>();
+    private ConcurrentHashMap<Long, SecureSquareDivisionMaster> divisions = new ConcurrentHashMap<>();
 
-	private ConcurrentHashMap<Long, CompletableFuture<Double>> futures = new ConcurrentHashMap<Long, CompletableFuture<Double>>();
+    private ConcurrentHashMap<Long, CompletableFuture<Double>> futures = new ConcurrentHashMap<>();
 
-	private KeyPair keyPair;
+    private KeyPair keyPair;
 
-	private final DataLayer dataLayer;
-	private final FactoryHelper squareDivisionFactory;
+    private final DataLayer dataLayer;
+    private final FactoryHelper squareDivisionFactory;
 
-	SquareDivisionMasterController(DataLayer dataLayer,
-			SquareDivisionSenderAdapter sender, KeyPair keyPair,
-			FactoryHelper helper) {
+    SquareDivisionMasterController(DataLayer dataLayer,
+                                   SquareDivisionSenderAdapter sender, KeyPair keyPair,
+                                   FactoryHelper helper) {
 
-		this.dataLayer = dataLayer;
-		this.sender = sender;
-		this.keyPair = keyPair;
-		this.squareDivisionFactory = helper;
-	}
+        this.dataLayer = dataLayer;
+        this.sender = sender;
+        this.keyPair = keyPair;
+        this.squareDivisionFactory = helper;
+    }
 
-	public SquareDivisionMasterController(DataLayer dataLayer,
-			SquareDivisionSenderAdapter sender, KeyPair keyPair) {
-		this(dataLayer, sender, keyPair, new FactoryHelper());
-	}
+    public SquareDivisionMasterController(DataLayer dataLayer,
+                                          SquareDivisionSenderAdapter sender, KeyPair keyPair) {
+        this(dataLayer, sender, keyPair, new FactoryHelper());
+    }
 
-	public CompletableFuture<Double> compute(String attrName, String attrValue,
-			List<NodeValuePair> path) {
+    public CompletableFuture<Double> compute(String attrName, String attrValue,
+                                             List<NodeValuePair> path) {
 
-		long id = idCounter.getAndIncrement();
+        long id = idCounter.getAndIncrement();
 
-		SecureSquareDivisionMaster d = squareDivisionFactory.finalize(keyPair);
-		divisions.put(id, d);
+        SecureSquareDivisionMaster d = squareDivisionFactory.finalize(keyPair);
+        divisions.put(id, d);
 
-		Map<Object, Long> cpcv = dataLayer.countPerClassValue(path,
-				attrName, attrValue);
-		
-		List<MultiplicationResult> results = d.createMultiplications(cpcv);
+        Map<Object, Long> cpcv = dataLayer.countPerClassValue(path,
+                attrName, attrValue);
 
-		SquareDivisionPojo pojo = new SquareDivisionPojo(id, attrName,
-				attrValue, path, results);
+        List<MultiplicationResult> results = d.createMultiplications(cpcv);
 
-		CompletableFuture<Double> f = new CompletableFuture<Double>();
-		futures.put(id, f);
-		
-		sender.handleMultiplicationForwardStep(pojo);
+        SquareDivisionPojo pojo = new SquareDivisionPojo(id, attrName,
+                attrValue, path, results);
 
-		return f;
-	}
+        CompletableFuture<Double> f = new CompletableFuture<>();
+        futures.put(id, f);
 
-	public void handleMultiplicationBackwardStep(SquareDivisionPojo data) {
-		long id = data.getId();
+        sender.handleMultiplicationForwardStep(pojo);
 
-		SecureSquareDivisionMaster sD = divisions.get(id);
-		AdditionResults r = sD.handleMultiplicationBackwardStep(data
-				.getResults());
+        return f;
+    }
 
-		sender.handleAdditionForwardStep(id, r);
-	}
+    public void handleMultiplicationBackwardStep(SquareDivisionPojo data) {
+        long id = data.getId();
 
-	@Override
-	public void handleAdditionBackwardStep(
-			long squareID,
-			AdditionResults results) {
-		SecureSquareDivisionMaster d = divisions.get(squareID);
-		d.handleAdditionBackwardStep(results);
+        SecureSquareDivisionMaster sD = divisions.get(id);
+        AdditionResults r = sD.handleMultiplicationBackwardStep(data
+                .getResults());
 
-		sender.collectOutputShares(squareID);
-	}
+        sender.handleAdditionForwardStep(id, r);
+    }
 
-	@Override
-	public void handleCollectOutputShares(long squareID,
-			List<AdditionResults> outputShares) {
-		SecureSquareDivisionMaster d = divisions.get(squareID);
-		
-		Double result = d.computeResult(outputShares);
-		
-		CompletableFuture<Double> f = futures.get(squareID);
-		f.complete(result);
-	}
+    @Override
+    public void handleAdditionBackwardStep(
+            long squareID,
+            AdditionResults results) {
+        SecureSquareDivisionMaster d = divisions.get(squareID);
+        d.handleAdditionBackwardStep(results);
 
-	static class FactoryHelper {
-		SecureSquareDivisionMaster finalize(KeyPair kp) {
-			return new SecureSquareDivisionMaster(kp);
-		}
-	}
+        sender.collectOutputShares(squareID);
+    }
+
+    @Override
+    public void handleCollectOutputShares(long squareID,
+                                          List<AdditionResults> outputShares) {
+        SecureSquareDivisionMaster d = divisions.get(squareID);
+
+        Double result = d.computeResult(outputShares);
+
+        CompletableFuture<Double> f = futures.get(squareID);
+        f.complete(result);
+    }
+
+    static class FactoryHelper {
+        SecureSquareDivisionMaster finalize(KeyPair kp) {
+            return new SecureSquareDivisionMaster(kp);
+        }
+    }
 }
