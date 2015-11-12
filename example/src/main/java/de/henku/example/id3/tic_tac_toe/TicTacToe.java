@@ -45,6 +45,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Create ID3 classification tree for " Tic-Tac-Toe Endgame Data Set" from
+ * UCI - Machine learning repository.
+ * <br><br>
+ * Dataset:
+ * <ul>
+ *  <li>https://archive.ics.uci.edu/ml/datasets/Tic-Tac-Toe+Endgame</li>
+ *  <li>Lichman, M. (2013). UCI Machine Learning Repository [http://archive.ics.uci.edu/ml]. Irvine, CA: University of California, School of Information and Computer Science.</li>
+ * </ul>
+ */
 public class TicTacToe {
 
     public static final String DATASET_URL = "de/henku/example/id3/tic-tac-toe.data";
