@@ -207,22 +207,22 @@ public class SquareDivisionLastControllerTests {
         subject.handleMultiplicationForwardStep(pojo1);
         subject.handleMultiplicationForwardStep(pojo2);
 
-        AdditionResults e1 = mock(AdditionResults.class);
+        SquareDivisionResult e1 = mock(SquareDivisionResult.class);
         when(compMock1.getAdditionOutputShares()).thenReturn(e1);
         subject.collectOutputShares(0);
 
-        ArgumentCaptor<List<AdditionResults>> argument = ArgumentCaptor.forClass((Class) List.class);
+        ArgumentCaptor<List<SquareDivisionResult>> argument = ArgumentCaptor.forClass((Class) List.class);
         verify(recieverMock).handleCollectOutputShares(eq(0l), argument.capture());
-        AdditionResults a1 = argument.getValue().get(0);
+        SquareDivisionResult a1 = argument.getValue().get(0);
         assertEquals(e1, a1);
 
-        AdditionResults e2 = mock(AdditionResults.class);
+        SquareDivisionResult e2 = mock(SquareDivisionResult.class);
         when(compMock2.getAdditionOutputShares()).thenReturn(e2);
         subject.collectOutputShares(1l);
 
         argument = ArgumentCaptor.forClass((Class) List.class);
         verify(recieverMock).handleCollectOutputShares(eq(1l), argument.capture());
-        AdditionResults a2 = argument.getValue().get(0);
+        SquareDivisionResult a2 = argument.getValue().get(0);
         assertEquals(e2, a2);
     }
 }

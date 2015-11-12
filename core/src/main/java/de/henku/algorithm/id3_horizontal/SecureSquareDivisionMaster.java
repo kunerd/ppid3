@@ -20,6 +20,9 @@ public class SecureSquareDivisionMaster {
     private SecureComputationMaster z;
     private SecureComputationMaster w;
 
+    private Object classValue = null;
+//    private int classValueCount = 0;
+
     private final ConcurrentHashMap<Object, SecureComputationMaster> multiplications =
             new ConcurrentHashMap<>();
 
@@ -35,15 +38,20 @@ public class SecureSquareDivisionMaster {
     public List<MultiplicationResult> createMultiplications(Map<Object, Long> counts) {
         List<MultiplicationResult> results = new ArrayList<>();
 
-        for (Object classValue : counts.keySet()) {
-            long count = counts.get(classValue);
+        for (Object cv : counts.keySet()) {
+            long count = counts.get(cv);
+
+            if ( count != 0l ) {
+                classValue = cv;
+//                classValueCount++;
+            }
 
             SecureComputationMaster m = factoryHelper.finalize(count, keyPair);
-            multiplications.put(classValue, m);
+            multiplications.put(cv, m);
 
             BigInteger result = m.startEncryptedComputation();
 
-            results.add(new MultiplicationResult(classValue, result));
+            results.add(new MultiplicationResult(cv, result));
         }
 
         return results;
@@ -95,21 +103,34 @@ public class SecureSquareDivisionMaster {
         return result;
     }
 
-    public Double computeResult(List<AdditionResults> outputShares) {
+    public GiniGainResult computeResult(List<SquareDivisionResult> outputShares) {
         BigInteger zResult = z.getOutputShare();
         BigInteger wResult = w.getOutputShare();
 
         BigInteger n = keyPair.getPublicKey().getN();
 
-        for (AdditionResults os : outputShares) {
-            zResult = zResult.multiply(os.getResultForZ()).mod(n);
-            wResult = wResult.multiply(os.getResultForW()).mod(n);
+        Object cv = classValue;
+//        if(classValueCount == 1) {
+//            cv = classValue;
+//        }
+
+        for (SquareDivisionResult os : outputShares) {
+            zResult = zResult.multiply(os.getOutputShareZ()).mod(n);
+            wResult = wResult.multiply(os.getOutputShareW()).mod(n);
+
+            if(os.getClassValue() != null) {
+                cv = os.getClassValue();
+            }
         }
 
+        double r;
         if (wResult.equals(BigInteger.ZERO)) {
-            return 0d;
+            r = 0d;
+        } else {
+            r = zResult.doubleValue() / wResult.doubleValue();
         }
-        return zResult.doubleValue() / wResult.doubleValue();
+
+        return new GiniGainResult(cv, r);
     }
 
     static class FactoryHelper {

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class SquareDivisionMasterController implements
         SquareDivisionReceiverAdapter {
@@ -20,7 +21,7 @@ public class SquareDivisionMasterController implements
 
     private ConcurrentHashMap<Long, SecureSquareDivisionMaster> divisions = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<Long, CompletableFuture<Double>> futures = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Long, CompletableFuture<GiniGainResult>> futures = new ConcurrentHashMap<>();
 
     private KeyPair keyPair;
 
@@ -42,7 +43,7 @@ public class SquareDivisionMasterController implements
         this(dataLayer, sender, keyPair, new FactoryHelper());
     }
 
-    public CompletableFuture<Double> compute(String attrName, String attrValue,
+    public CompletableFuture<GiniGainResult> compute(String attrName, String attrValue,
                                              List<NodeValuePair> path) {
 
         long id = idCounter.getAndIncrement();
@@ -58,7 +59,7 @@ public class SquareDivisionMasterController implements
         SquareDivisionPojo pojo = new SquareDivisionPojo(id, attrName,
                 attrValue, path, results);
 
-        CompletableFuture<Double> f = new CompletableFuture<>();
+        CompletableFuture<GiniGainResult> f = new CompletableFuture<>();
         futures.put(id, f);
 
         sender.handleMultiplicationForwardStep(pojo);
@@ -88,13 +89,13 @@ public class SquareDivisionMasterController implements
 
     @Override
     public void handleCollectOutputShares(long squareID,
-                                          List<AdditionResults> outputShares) {
+                                          List<SquareDivisionResult> outputShares) {
         SecureSquareDivisionMaster d = divisions.get(squareID);
 
-        Double result = d.computeResult(outputShares);
+        GiniGainResult r = d.computeResult(outputShares);
 
-        CompletableFuture<Double> f = futures.get(squareID);
-        f.complete(result);
+        CompletableFuture<GiniGainResult> f = futures.get(squareID);
+        f.complete(r);
     }
 
     static class FactoryHelper {

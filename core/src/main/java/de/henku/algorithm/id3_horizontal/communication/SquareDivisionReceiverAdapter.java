@@ -1,6 +1,7 @@
 package de.henku.algorithm.id3_horizontal.communication;
 
 import de.henku.algorithm.id3_horizontal.AdditionResults;
+import de.henku.algorithm.id3_horizontal.SquareDivisionResult;
 
 import java.util.List;
 
@@ -11,5 +12,5 @@ public interface SquareDivisionReceiverAdapter {
                                     AdditionResults results);
 
     void handleCollectOutputShares(long squareID,
-                                   List<AdditionResults> outputShares);
+                                   List<SquareDivisionResult> outputShares);
 }

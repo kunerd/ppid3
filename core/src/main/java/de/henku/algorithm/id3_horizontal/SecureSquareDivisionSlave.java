@@ -25,6 +25,9 @@ public class SecureSquareDivisionSlave {
     private final ConcurrentHashMap<Object, SecureMultiplication> multiplications =
             new ConcurrentHashMap<>();
 
+    private Object classValue = null;
+    private int classValueCount = 0;
+
     public SecureSquareDivisionSlave(PublicKey publicKey) {
         this.publicKey = publicKey;
     }
@@ -33,19 +36,24 @@ public class SecureSquareDivisionSlave {
         List<MultiplicationResult> results = new ArrayList<>();
 
         for (MultiplicationResult r : prevResults) {
-            Object classValue = r.getClassValue();
-            long count = counts.get(classValue);
+            Object cv = r.getClassValue();
+            long count = counts.get(cv);
+
+            if ( count != 0l ) {
+                classValue = cv;
+                classValueCount++;
+            }
 
             inputs.add(BigInteger.valueOf(count));
 
             SecureMultiplication m = new SecureMultiplication(
                     BigInteger.valueOf(count), publicKey);
 
-            multiplications.put(classValue, m);
+            multiplications.put(cv, m);
 
             BigInteger result = m.forwardStep(r.getResult());
 
-            results.add(new MultiplicationResult(classValue, result));
+            results.add(new MultiplicationResult(cv, result));
         }
 
         return results;
@@ -110,8 +118,11 @@ public class SecureSquareDivisionSlave {
         return result;
     }
 
-    public AdditionResults getAdditionOutputShares() {
-        return new AdditionResults(z.getOutputShare(), w.getOutputShare());
+    public SquareDivisionResult getAdditionOutputShares() {
+//        if(classValueCount == 1) {
+            return new SquareDivisionResult(z.getOutputShare(), w.getOutputShare(), classValue);
+//        }
+//        return new SquareDivisionResult(z.getOutputShare(), w.getOutputShare(), null);
     }
 
 }

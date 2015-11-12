@@ -69,7 +69,7 @@ public class SquareDivisionLastController implements SquareDivisionSenderAdapter
     public void collectOutputShares(long squareID) {
         SecureSquareDivisionSlave d = divisions.get(squareID);
 
-        List<AdditionResults> outputShares = new ArrayList<>();
+        List<SquareDivisionResult> outputShares = new ArrayList<>();
         outputShares.add(d.getAdditionOutputShares());
 
         receiver.handleCollectOutputShares(squareID, outputShares);

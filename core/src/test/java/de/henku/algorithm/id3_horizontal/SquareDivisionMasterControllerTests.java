@@ -45,14 +45,6 @@ public class SquareDivisionMasterControllerTests {
     }
 
     @Test
-    public void compute_returnsFuture() {
-        List<NodeValuePair> path = new ArrayList<NodeValuePair>();
-        Future<Double> f = subject.compute("attrName", "attrValue", path);
-
-        assertNotNull(f);
-    }
-
-    @Test
     public void compute_createsNewSquareDivisionMasterInstance() {
         List<NodeValuePair> path = new ArrayList<NodeValuePair>();
         subject.compute("attrName", "attrValue", path);
@@ -149,12 +141,20 @@ public class SquareDivisionMasterControllerTests {
     }
 
     @Test
+    public void compute_returnsFuture() {
+        List<NodeValuePair> path = new ArrayList<NodeValuePair>();
+        Future<GiniGainResult> f = subject.compute("attrName", "attrValue", path);
+
+        assertNotNull(f);
+    }
+
+    @Test
     public void collectOutputShares_completesCorrectFuture() {
         List<NodeValuePair> path = new ArrayList<NodeValuePair>();
-        Future<Double> f = subject.compute("attrName", "attrValue", path);
+        Future<GiniGainResult> f = subject.compute("attrName", "attrValue", path);
         subject.compute("attrName", "attrValue", path);
 
-        List<AdditionResults> ar = new ArrayList<AdditionResults>();
+        List<SquareDivisionResult> ar = new ArrayList<>();
         subject.handleCollectOutputShares(0, ar);
 
         assertTrue(f.isDone());
@@ -164,11 +164,11 @@ public class SquareDivisionMasterControllerTests {
     @Test
     public void collectOutputShares_completesFutureWithCorrectResult() throws InterruptedException, ExecutionException {
         List<NodeValuePair> path = new ArrayList<NodeValuePair>();
-        Future<Double> f = subject.compute("attrName", "attrValue", path);
+        Future<GiniGainResult> f = subject.compute("attrName", "attrValue", path);
         subject.compute("attrName", "attrValue", path);
 
-        Double e = 0.01;
-        List<AdditionResults> ar = new ArrayList<AdditionResults>();
+        GiniGainResult e = new GiniGainResult("tt", 0.01);
+        List<SquareDivisionResult> ar = new ArrayList<>();
         when(squareDivisionMock.computeResult(ar)).thenReturn(e);
 
         subject.handleCollectOutputShares(0, ar);

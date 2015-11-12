@@ -12,7 +12,6 @@ import java.util.concurrent.ExecutionException;
 
 public class SecureID3 {
 
-    private int dirtyCount = 0;
     private SquareDivisionMasterController controller;
 
     public SecureID3(
@@ -29,14 +28,18 @@ public class SecureID3 {
 
         long classValueCount = 0;
 
+        // FIXME: refactor class value assignment
+        Object classValue = "empty";
 
         for (Attribute attribute : attributes) {
-            double current = giniGain(attribute, path);
+            GiniGainResult r = giniGain(attribute, path);
+            double current = r.result;
 
             if (current == -1) {
                 classValueCount++;
-            } else {
+                classValue = r.classValue;
 
+            } else {
                 if (current > maxGain) {
                     max = attribute;
                     maxGain = current;
@@ -45,9 +48,7 @@ public class SecureID3 {
         }
 
         if (max == null || classValueCount == 1) {
-            // FIXME use concrete class value
-            String classValue = "classValue" + dirtyCount++;
-            return new ID3Node(classValue);
+            return new ID3Node(classValue.toString());
         }
 
         ID3Node n = new ID3Node(max.getName());
@@ -67,19 +68,20 @@ public class SecureID3 {
         return n;
     }
 
-    private double giniGain(Attribute attribute, List<NodeValuePair> path) {
+    private GiniGainResult giniGain(Attribute attribute, List<NodeValuePair> path) {
         double sum = 0;
 
         String attrName = attribute.getName();
 
         for (String attrValue : attribute.getValues()) {
 
-            CompletableFuture<Double> f = controller.compute(attrName, attrValue, path);
+            CompletableFuture<GiniGainResult> f = controller.compute(attrName, attrValue, path);
 
             try {
-                double gini = f.get();
+                GiniGainResult r = f.get();
+                double gini = r.result;
                 if (gini == 1) {
-                    return -1;
+                    return new GiniGainResult(r.classValue, -1d);
                 }
                 sum += gini;
             } catch (InterruptedException | ExecutionException e) {
@@ -87,7 +89,7 @@ public class SecureID3 {
                 e.printStackTrace();
             }
         }
-        return sum;
+        return new GiniGainResult("", sum);
     }
 
     public SquareDivisionMasterController getController() {
